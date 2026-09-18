@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Nova Bus Tracker</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dash-page">
+  <div class="dash-shell">
+    <div class="dash-topbar">
+      <div class="dash-topbar-inner">
+        <div class="topbar-brand">
+          <div class="topbar-mark">🚌</div>
+          <div class="topbar-brand-text">
+            <span class="school-name">Nova High School</span>
+            <span class="page-name">Bus Tracker</span>
+          </div>
+        </div>
+        <button id="logout-btn" class="logout-btn">Log Out</button>
+      </div>
+    </div>
+
+    <div class="dash-body">
+      <div class="welcome-banner">
+        <div>
+          <h1>Admin Dashboard</h1>
+          <p id="welcome-msg">Loading...</p>
+        </div>
+        <span class="role-pill">ADMIN</span>
+      </div>
+
+      <p class="section-label">Manage</p>
+      <div class="card-grid">
+        <div class="admin-card">
+          <div class="admin-card-icon">🗺️</div>
+          <h2>Manage Routes</h2>
+          <p>Add, edit, or remove bus routes and stops.</p>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-icon">⏱️</div>
+          <h2>Late Monitoring</h2>
+          <p>See which buses arrived late today.</p>
+        </div>
+        <div class="admin-card">
+          <div class="admin-card-icon">👥</div>
+          <h2>Manage Users</h2>
+          <p>Assign roles to drivers, teachers, and students.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="firebase-config.js"></script>
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

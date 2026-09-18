@@ -1,0 +1,326 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --green-deep: #0F3D2E;
+  --green-mid: #16513D;
+  --green-card: #1A5240;
+  --gold: #D4AF37;
+  --gold-bright: #E8C55C;
+  --cream: #F5F1E6;
+  --sage: #8FA896;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--green-deep);
+  background-image:
+    radial-gradient(circle at 15% 15%, rgba(212, 175, 55, 0.06), transparent 40%),
+    radial-gradient(circle at 85% 85%, rgba(212, 175, 55, 0.05), transparent 40%);
+  color: var(--cream);
+  padding: 1.5rem;
+}
+
+.login-container {
+  background: var(--green-card);
+  border-radius: 4px;
+  width: 100%;
+  max-width: 380px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.accent-bar {
+  height: 6px;
+  background: linear-gradient(90deg, var(--gold) 0%, var(--gold-bright) 50%, var(--gold) 100%);
+}
+
+.card-body {
+  padding: 2.5rem 2rem 2rem;
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.brand-mark {
+  width: 52px;
+  height: 52px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  border: 2px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+h1 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--cream);
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--sage);
+  margin-top: 0.35rem;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--sage);
+}
+
+input {
+  padding: 0.8rem 0.9rem;
+  border-radius: 6px;
+  border: 1px solid rgba(143, 168, 150, 0.35);
+  background: var(--green-deep);
+  color: var(--cream);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+input::placeholder {
+  color: rgba(245, 241, 230, 0.35);
+}
+
+input:focus {
+  border-color: var(--gold);
+}
+
+button {
+  margin-top: 0.5rem;
+  padding: 0.85rem;
+  border-radius: 6px;
+  border: none;
+  background: var(--gold);
+  color: var(--green-deep);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+button:hover {
+  background: var(--gold-bright);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+#error-msg {
+  color: #E8918A;
+  font-size: 0.85rem;
+  margin-top: 1rem;
+  min-height: 1.2em;
+  text-align: center;
+}
+
+.footer-note {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--sage);
+  margin-top: 1.5rem;
+}
+
+/* Dashboard layout (admin, driver, teacher, student pages) */
+
+body.dash-page {
+  align-items: flex-start;
+  padding: 0;
+}
+
+.dash-shell {
+  width: 100%;
+  min-height: 100vh;
+}
+
+.dash-topbar {
+  background: var(--green-mid);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.25);
+}
+
+.dash-topbar-inner {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+
+.topbar-mark {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--gold);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.topbar-brand-text {
+  line-height: 1.15;
+}
+
+.topbar-brand-text .school-name {
+  font-size: 0.72rem;
+  color: var(--sage);
+  display: block;
+}
+
+.topbar-brand-text .page-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--cream);
+}
+
+.logout-btn {
+  padding: 0.55rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(143, 168, 150, 0.35);
+  background: transparent;
+  color: var(--cream);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.logout-btn:hover {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.08);
+}
+
+.dash-body {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2.5rem 2rem 3rem;
+}
+
+.welcome-banner {
+  background: linear-gradient(120deg, var(--green-card) 0%, var(--green-mid) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 10px;
+  padding: 1.5rem 1.75rem;
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.welcome-banner h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--cream);
+  margin-bottom: 0.3rem;
+}
+
+.welcome-banner p {
+  font-size: 0.85rem;
+  color: var(--sage);
+}
+
+.role-pill {
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.4rem 0.85rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.section-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--sage);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 1rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.1rem;
+}
+
+.admin-card {
+  background: var(--green-card);
+  border: 1px solid rgba(143, 168, 150, 0.18);
+  border-radius: 10px;
+  padding: 1.5rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
+}
+
+.admin-card:hover {
+  border-color: var(--gold);
+  background: var(--green-mid);
+  transform: translateY(-2px);
+}
+
+.admin-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  background: rgba(212, 175, 55, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  margin-bottom: 1rem;
+}
+
+.admin-card h2 {
+  font-size: 1rem;
+  color: var(--cream);
+  margin-bottom: 0.4rem;
+}
+
+.admin-card p {
+  font-size: 0.85rem;
+  color: var(--sage);
+  line-height: 1.45;
+}

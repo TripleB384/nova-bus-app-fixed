@@ -1,0 +1,18 @@
+{
+  "name": "Nova Bus Tracker",
+  "short_name": "Nova Bus",
+  "description": "Live bus tracking for Nova High School drivers, teachers, students, and staff.",
+  "start_url": "index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0F3D2E",
+  "theme_color": "#0F3D2E",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any"
+    }
+  ]
+}
