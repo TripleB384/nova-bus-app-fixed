@@ -291,7 +291,6 @@ body.dash-page {
   border: 1px solid rgba(143, 168, 150, 0.18);
   border-radius: 10px;
   padding: 1.5rem;
-  cursor: pointer;
   transition: border-color 0.15s ease, transform 0.15s ease, background 0.15s ease;
 }
 
@@ -311,6 +310,7 @@ body.dash-page {
   justify-content: center;
   font-size: 1.2rem;
   margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 .admin-card h2 {
@@ -323,4 +323,82 @@ body.dash-page {
   font-size: 0.85rem;
   color: var(--sage);
   line-height: 1.45;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  cursor: pointer;
+}
+
+.card-header .admin-card-icon {
+  margin-bottom: 0;
+}
+
+.card-header h2 {
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.card-chevron {
+  color: var(--sage);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.admin-card.is-expanded .card-chevron {
+  transform: rotate(180deg);
+}
+
+.card-detail {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s ease;
+}
+
+.admin-card.is-expanded .card-detail {
+  max-height: 640px;
+  margin-top: 1rem;
+}
+
+.card-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.card-form input {
+  padding: 0.6rem 0.75rem;
+  font-size: 0.9rem;
+}
+
+.card-form button {
+  margin-top: 0.2rem;
+  padding: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.delay-banner {
+  color: #E8918A;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+  display: none;
+}
+
+.delay-banner.is-visible {
+  display: block;
+}
+
+.delay-list p {
+  font-size: 0.85rem;
+  color: var(--cream);
+  margin-bottom: 0.5rem;
+}
+
+.form-error {
+  color: #E8918A;
+  font-size: 0.8rem;
+  min-height: 1em;
 }

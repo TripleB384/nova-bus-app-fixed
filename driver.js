@@ -7,9 +7,17 @@ const logoutBtn = document.getElementById("logout-btn");
 const errorMsg = document.getElementById("error-msg");
 const trackingStatus = document.getElementById("tracking-status");
 const trackingToggle = document.getElementById("tracking-toggle");
+const tripSummary = document.getElementById("trip-summary");
+const delayStatus = document.getElementById("delay-status");
+const delayMinutesInput = document.getElementById("delay-minutes");
+const delayNoteInput = document.getElementById("delay-note");
+const delaySubmit = document.getElementById("delay-submit");
+const delayError = document.getElementById("delay-error");
 
 let currentUser = null;
 let watchId = null;
+let sharingSince = null;
+let delayActive = false;
 
 // Guard: only signed-in drivers should see this page
 onAuthStateChanged(auth, async (user) => {
@@ -29,10 +37,27 @@ onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
     welcomeMsg.textContent = "Signed in as " + user.email;
+
+    const busSnap = await getDoc(doc(db, "buses", user.uid));
+    if (busSnap.exists() && busSnap.data().delayed) {
+      const data = busSnap.data();
+      delayActive = true;
+      delaySubmit.textContent = "Clear Delay";
+      delayStatus.textContent = `Reported ${data.delayMinutes} min delay${data.delayNote ? " — " + data.delayNote : ""}.`;
+    }
   } catch (err) {
     welcomeMsg.textContent = "Error loading profile: " + err.message;
   }
 });
+
+function updateTripSummary() {
+  if (!sharingSince) {
+    tripSummary.textContent = "Not sharing your location right now.";
+    return;
+  }
+  const minutes = Math.max(0, Math.round((Date.now() - sharingSince) / 60000));
+  tripSummary.textContent = `Sharing for ${minutes} minute${minutes === 1 ? "" : "s"}. Last update just now.`;
+}
 
 function startSharing() {
   if (!navigator.geolocation) {
@@ -57,6 +82,7 @@ function startSharing() {
           },
           { merge: true }
         );
+        updateTripSummary();
       } catch (err) {
         errorMsg.textContent = "Error sharing location: " + err.message;
       }
@@ -68,6 +94,8 @@ function startSharing() {
     { enableHighAccuracy: true }
   );
 
+  sharingSince = Date.now();
+  updateTripSummary();
   trackingStatus.textContent = "Sharing your live location...";
   trackingToggle.textContent = "Stop Sharing Location";
 }
@@ -78,7 +106,9 @@ async function stopSharing() {
     watchId = null;
   }
 
-  trackingStatus.textContent = "Begin sharing your live location for today's route.";
+  sharingSince = null;
+  updateTripSummary();
+  trackingStatus.textContent = "Begin sharing your live location while you drive.";
   trackingToggle.textContent = "Start Sharing Location";
 
   if (currentUser) {
@@ -95,6 +125,56 @@ trackingToggle.addEventListener("click", () => {
     startSharing();
   } else {
     stopSharing();
+  }
+});
+
+delaySubmit.addEventListener("click", async () => {
+  if (!currentUser) return;
+  delayError.textContent = "";
+
+  try {
+    if (!delayActive) {
+      const minutes = parseInt(delayMinutesInput.value, 10);
+      if (!minutes || minutes <= 0) {
+        delayError.textContent = "Enter how many minutes late.";
+        return;
+      }
+
+      await setDoc(
+        doc(db, "buses", currentUser.uid),
+        {
+          driverEmail: currentUser.email,
+          delayed: true,
+          delayMinutes: minutes,
+          delayNote: delayNoteInput.value || null,
+          delayUpdatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      delayActive = true;
+      delaySubmit.textContent = "Clear Delay";
+      delayStatus.textContent = `Reported ${minutes} min delay${delayNoteInput.value ? " — " + delayNoteInput.value : ""}.`;
+    } else {
+      await setDoc(
+        doc(db, "buses", currentUser.uid),
+        {
+          delayed: false,
+          delayMinutes: null,
+          delayNote: null,
+          delayUpdatedAt: serverTimestamp(),
+        },
+        { merge: true }
+      );
+
+      delayActive = false;
+      delaySubmit.textContent = "Report Delay";
+      delayStatus.textContent = "No delay reported.";
+      delayMinutesInput.value = "";
+      delayNoteInput.value = "";
+    }
+  } catch (err) {
+    delayError.textContent = err.message;
   }
 });
 

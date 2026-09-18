@@ -4,21 +4,55 @@ import { doc, getDoc, collection, query, where, onSnapshot } from "https://www.g
 
 const welcomeMsg = document.getElementById("welcome-msg");
 const logoutBtn = document.getElementById("logout-btn");
+const delayBanner = document.getElementById("delay-banner");
+const mapCardHeader = document.querySelector("#map-card .card-header");
+
+const BROWARD_CENTER = [26.1901, -80.3659];
+const BROWARD_ZOOM = 11;
+const BROWARD_MIN_ZOOM = 9;
 
 const busMarkers = new Map();
 let unsubscribeBuses = null;
+let map = null;
+
+function renderDelayBanner(busDocs) {
+  const delayed = busDocs.filter((d) => d.data().delayed);
+
+  if (delayed.length === 0) {
+    delayBanner.classList.remove("is-visible");
+    return;
+  }
+
+  const summary = delayed
+    .map((d) => {
+      const data = d.data();
+      return `${data.driverEmail || "A bus"} is running ${data.delayMinutes} min late`;
+    })
+    .join("; ");
+
+  delayBanner.textContent = "🚨 " + summary;
+  delayBanner.classList.add("is-visible");
+}
 
 function startLiveMap() {
-  const map = L.map("bus-map").setView([0, 0], 2);
+  map = L.map("bus-map", { minZoom: BROWARD_MIN_ZOOM }).setView(BROWARD_CENTER, BROWARD_ZOOM);
 
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution: "&copy; OpenStreetMap contributors",
     maxZoom: 19,
   }).addTo(map);
 
+  if (mapCardHeader) {
+    mapCardHeader.addEventListener("click", () => {
+      setTimeout(() => map.invalidateSize(), 260);
+    });
+  }
+
   const busesQuery = query(collection(db, "buses"), where("active", "==", true));
 
   unsubscribeBuses = onSnapshot(busesQuery, (snapshot) => {
+    renderDelayBanner(snapshot.docs);
+
     snapshot.docChanges().forEach((change) => {
       const busId = change.doc.id;
 

@@ -35,26 +35,48 @@
 
       <p class="section-label">Route</p>
       <div class="card-grid">
-        <div class="admin-card" style="cursor: default;">
-          <div class="admin-card-icon">🚍</div>
-          <h2>Start Route</h2>
-          <p id="tracking-status">Begin sharing your live location for today's route.</p>
-          <button id="tracking-toggle">Start Sharing Location</button>
+        <div class="admin-card is-expanded">
+          <div class="card-header">
+            <div class="admin-card-icon">🚍</div>
+            <h2>Start Route</h2>
+            <span class="card-chevron">▾</span>
+          </div>
+          <div class="card-detail">
+            <p id="tracking-status">Begin sharing your live location while you drive.</p>
+            <button id="tracking-toggle">Start Sharing Location</button>
+          </div>
         </div>
         <div class="admin-card">
-          <div class="admin-card-icon">🗺️</div>
-          <h2>My Route</h2>
-          <p>View your assigned stops and pickup order.</p>
+          <div class="card-header">
+            <div class="admin-card-icon">🕒</div>
+            <h2>Trip Summary</h2>
+            <span class="card-chevron">▾</span>
+          </div>
+          <div class="card-detail">
+            <p id="trip-summary">Not sharing your location right now.</p>
+          </div>
         </div>
         <div class="admin-card">
-          <div class="admin-card-icon">⏱️</div>
-          <h2>Report Delay</h2>
-          <p>Let riders know if you're running behind schedule.</p>
+          <div class="card-header">
+            <div class="admin-card-icon">⏱️</div>
+            <h2>Report Delay</h2>
+            <span class="card-chevron">▾</span>
+          </div>
+          <div class="card-detail">
+            <p id="delay-status">No delay reported.</p>
+            <div class="card-form">
+              <input type="number" id="delay-minutes" placeholder="Minutes late" min="1">
+              <input type="text" id="delay-note" placeholder="Note (optional)">
+              <button id="delay-submit">Report Delay</button>
+              <p id="delay-error" class="form-error"></p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
 
+  <script src="cards.js" defer></script>
   <script type="module" src="firebase-config.js"></script>
   <script type="module" src="driver.js"></script>
 </body>
