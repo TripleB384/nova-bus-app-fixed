@@ -6,6 +6,7 @@
   <title>Student — Nova Bus Tracker</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body class="dash-page">
   <div class="dash-shell">
@@ -33,10 +34,11 @@
 
       <p class="section-label">My Bus</p>
       <div class="card-grid">
-        <div class="admin-card">
+        <div class="admin-card" style="cursor: default;">
           <div class="admin-card-icon">🚌</div>
           <h2>Live Location</h2>
           <p>See exactly where your bus is right now.</p>
+          <div id="bus-map" style="height: 320px; border-radius: 10px; margin-top: 1rem; overflow: hidden;"></div>
         </div>
         <div class="admin-card">
           <div class="admin-card-icon">⏱️</div>
@@ -52,6 +54,7 @@
     </div>
   </div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script type="module" src="firebase-config.js"></script>
   <script type="module" src="student.js"></script>
 </body>

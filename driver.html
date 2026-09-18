@@ -31,12 +31,15 @@
         <span class="role-pill">DRIVER</span>
       </div>
 
+      <p id="error-msg"></p>
+
       <p class="section-label">Route</p>
       <div class="card-grid">
-        <div class="admin-card">
+        <div class="admin-card" style="cursor: default;">
           <div class="admin-card-icon">🚍</div>
           <h2>Start Route</h2>
-          <p>Begin sharing your live location for today's route.</p>
+          <p id="tracking-status">Begin sharing your live location for today's route.</p>
+          <button id="tracking-toggle">Start Sharing Location</button>
         </div>
         <div class="admin-card">
           <div class="admin-card-icon">🗺️</div>
