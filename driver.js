@@ -1,6 +1,15 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, getDoc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  collection,
+  query,
+  where,
+  onSnapshot,
+} from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const welcomeMsg = document.getElementById("welcome-msg");
 const logoutBtn = document.getElementById("logout-btn");
@@ -13,11 +22,18 @@ const delayMinutesInput = document.getElementById("delay-minutes");
 const delayNoteInput = document.getElementById("delay-note");
 const delaySubmit = document.getElementById("delay-submit");
 const delayError = document.getElementById("delay-error");
+const busMapEl = document.getElementById("bus-map");
+
+const BROWARD_CENTER = [26.1901, -80.3659];
+const BROWARD_ZOOM = 11;
+const BROWARD_MIN_ZOOM = 9;
 
 let currentUser = null;
 let watchId = null;
 let sharingSince = null;
 let delayActive = false;
+let map = null;
+const busMarkers = new Map();
 
 // Guard: only signed-in drivers should see this page
 onAuthStateChanged(auth, async (user) => {
@@ -59,6 +75,53 @@ function updateTripSummary() {
   tripSummary.textContent = `Sharing for ${minutes} minute${minutes === 1 ? "" : "s"}. Last update just now.`;
 }
 
+function showLiveMap() {
+  if (map) return;
+
+  busMapEl.style.display = "block";
+  map = L.map("bus-map", { minZoom: BROWARD_MIN_ZOOM }).setView(BROWARD_CENTER, BROWARD_ZOOM);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    attribution: "&copy; OpenStreetMap contributors",
+    maxZoom: 19,
+  }).addTo(map);
+
+  const busesQuery = query(collection(db, "buses"), where("active", "==", true));
+
+  onSnapshot(busesQuery, (snapshot) => {
+    snapshot.docChanges().forEach((change) => {
+      const busId = change.doc.id;
+
+      if (change.type === "removed") {
+        if (busMarkers.has(busId)) {
+          map.removeLayer(busMarkers.get(busId));
+          busMarkers.delete(busId);
+        }
+        return;
+      }
+
+      const data = change.doc.data();
+      if (typeof data.lat !== "number" || typeof data.lng !== "number") return;
+
+      const isYou = busId === currentUser.uid;
+      const label = isYou ? "You" : data.driverEmail || "Bus";
+
+      if (busMarkers.has(busId)) {
+        busMarkers.get(busId).setLatLng([data.lat, data.lng]);
+      } else {
+        const marker = L.marker([data.lat, data.lng]).addTo(map);
+        marker.bindPopup(label);
+        busMarkers.set(busId, marker);
+
+        if (isYou) {
+          map.setView([data.lat, data.lng], 15);
+          marker.openPopup();
+        }
+      }
+    });
+  });
+}
+
 function startSharing() {
   if (!navigator.geolocation) {
     errorMsg.textContent = "Geolocation isn't supported on this device.";
@@ -98,6 +161,7 @@ function startSharing() {
   updateTripSummary();
   trackingStatus.textContent = "Sharing your live location...";
   trackingToggle.textContent = "Stop Sharing Location";
+  showLiveMap();
 }
 
 async function stopSharing() {
