@@ -238,6 +238,24 @@ body.dash-page {
   background: rgba(212, 175, 55, 0.08);
 }
 
+.secondary-btn {
+  margin-top: 0.5rem;
+  padding: 0.65rem 1rem;
+  border-radius: 6px;
+  border: 1px solid rgba(143, 168, 150, 0.35);
+  background: transparent;
+  color: var(--cream);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.secondary-btn:hover {
+  border-color: var(--gold);
+  background: rgba(212, 175, 55, 0.08);
+}
+
 .dash-body {
   max-width: 960px;
   margin: 0 auto;

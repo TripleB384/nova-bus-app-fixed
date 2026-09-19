@@ -23,6 +23,7 @@ const delayNoteInput = document.getElementById("delay-note");
 const delaySubmit = document.getElementById("delay-submit");
 const delayError = document.getElementById("delay-error");
 const busMapEl = document.getElementById("bus-map");
+const finishBtn = document.getElementById("finish-route");
 
 const BROWARD_CENTER = [26.1901, -80.3659];
 const BROWARD_ZOOM = 11;
@@ -33,7 +34,17 @@ let watchId = null;
 let sharingSince = null;
 let delayActive = false;
 let map = null;
+let school = null;
 const busMarkers = new Map();
+
+async function loadSchoolSettings() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "school"));
+    if (snap.exists()) school = snap.data();
+  } catch (err) {
+    // Finish Route falls back to the driver's last GPS fix if this fails.
+  }
+}
 
 // Guard: only signed-in drivers should see this page
 onAuthStateChanged(auth, async (user) => {
@@ -53,6 +64,7 @@ onAuthStateChanged(auth, async (user) => {
 
     currentUser = user;
     welcomeMsg.textContent = "Signed in as " + user.email;
+    await loadSchoolSettings();
 
     const busSnap = await getDoc(doc(db, "buses", user.uid));
     if (busSnap.exists() && busSnap.data().delayed) {
@@ -137,6 +149,7 @@ function startSharing() {
           {
             driverEmail: currentUser.email,
             active: true,
+            arrived: false,
             lat: latitude,
             lng: longitude,
             heading: heading ?? null,
@@ -161,6 +174,7 @@ function startSharing() {
   updateTripSummary();
   trackingStatus.textContent = "Sharing your live location...";
   trackingToggle.textContent = "Stop Sharing Location";
+  finishBtn.style.display = "inline-block";
   showLiveMap();
 }
 
@@ -174,6 +188,7 @@ async function stopSharing() {
   updateTripSummary();
   trackingStatus.textContent = "Begin sharing your live location while you drive.";
   trackingToggle.textContent = "Start Sharing Location";
+  finishBtn.style.display = "none";
 
   if (currentUser) {
     try {
@@ -184,6 +199,44 @@ async function stopSharing() {
   }
 }
 
+async function finishRoute() {
+  if (!currentUser) return;
+
+  if (watchId !== null) {
+    navigator.geolocation.clearWatch(watchId);
+    watchId = null;
+  }
+
+  sharingSince = null;
+  updateTripSummary();
+  trackingStatus.textContent = "Route finished — arrived at school.";
+  trackingToggle.textContent = "Start Sharing Location";
+  finishBtn.style.display = "none";
+
+  const updates = {
+    active: false,
+    arrived: true,
+    arrivedAt: serverTimestamp(),
+    delayed: false,
+    delayMinutes: null,
+    delayNote: null,
+  };
+
+  if (school && typeof school.lat === "number" && typeof school.lng === "number") {
+    updates.lat = school.lat;
+    updates.lng = school.lng;
+  }
+
+  try {
+    await setDoc(doc(db, "buses", currentUser.uid), updates, { merge: true });
+    delayActive = false;
+    delaySubmit.textContent = "Report Delay";
+    delayStatus.textContent = "No delay reported.";
+  } catch (err) {
+    errorMsg.textContent = "Error finishing route: " + err.message;
+  }
+}
+
 trackingToggle.addEventListener("click", () => {
   if (watchId === null) {
     startSharing();
@@ -191,6 +244,8 @@ trackingToggle.addEventListener("click", () => {
     stopSharing();
   }
 });
+
+finishBtn.addEventListener("click", finishRoute);
 
 delaySubmit.addEventListener("click", async () => {
   if (!currentUser) return;

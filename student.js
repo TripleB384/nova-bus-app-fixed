@@ -1,6 +1,6 @@
 import { auth, db } from "./firebase-config.js";
 import { onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
-import { doc, getDoc, collection, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { doc, getDoc, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 
 const welcomeMsg = document.getElementById("welcome-msg");
 const logoutBtn = document.getElementById("logout-btn");
@@ -39,27 +39,45 @@ async function loadSchoolSettings() {
   }
 }
 
+function isToday(timestamp) {
+  if (!timestamp?.toDate) return false;
+  return timestamp.toDate().toDateString() === new Date().toDateString();
+}
+
 function renderEtaList(busDocs) {
   if (!school || typeof school.lat !== "number" || typeof school.lng !== "number") {
     etaList.innerHTML = "<p>School location hasn't been set yet — ask your admin.</p>";
     return;
   }
 
-  const active = busDocs.filter((d) => typeof d.data().lat === "number" && typeof d.data().lng === "number");
+  const relevant = busDocs.filter((d) => {
+    const data = d.data();
+    if (data.active && typeof data.lat === "number" && typeof data.lng === "number") return true;
+    if (data.arrived && isToday(data.arrivedAt)) return true;
+    return false;
+  });
 
-  if (active.length === 0) {
+  if (relevant.length === 0) {
     etaList.innerHTML = "<p>No buses are currently sharing their location.</p>";
     return;
   }
 
   etaList.innerHTML = "";
-  active.forEach((d) => {
+  relevant.forEach((d) => {
     const data = d.data();
-    const miles = haversineMiles(data.lat, data.lng, school.lat, school.lng);
-    const minutes = Math.round((miles / AVERAGE_SPEED_MPH) * 60);
-
     const item = document.createElement("p");
-    item.textContent = `${data.driverEmail || "Bus"} — ${miles.toFixed(1)} mi from school — ~${minutes} min (estimated)`;
+
+    if (data.active) {
+      const miles = haversineMiles(data.lat, data.lng, school.lat, school.lng);
+      const minutes = Math.round((miles / AVERAGE_SPEED_MPH) * 60);
+      item.textContent = `${data.driverEmail || "Bus"} — ${miles.toFixed(1)} mi from school — ~${minutes} min (estimated)`;
+    } else {
+      const time = data.arrivedAt?.toDate
+        ? data.arrivedAt.toDate().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        : "";
+      item.textContent = `${data.driverEmail || "Bus"} — arrived at school${time ? " at " + time : ""}`;
+    }
+
     etaList.appendChild(item);
   });
 }
@@ -73,7 +91,7 @@ function renderSchedule() {
 }
 
 function renderDelayBanner(busDocs) {
-  const delayed = busDocs.filter((d) => d.data().delayed);
+  const delayed = busDocs.filter((d) => d.data().delayed && d.data().active);
 
   if (delayed.length === 0) {
     delayBanner.classList.remove("is-visible");
@@ -105,25 +123,23 @@ function startLiveMap() {
     });
   }
 
-  const busesQuery = query(collection(db, "buses"), where("active", "==", true));
-
-  unsubscribeBuses = onSnapshot(busesQuery, (snapshot) => {
+  unsubscribeBuses = onSnapshot(collection(db, "buses"), (snapshot) => {
     renderDelayBanner(snapshot.docs);
     renderEtaList(snapshot.docs);
 
     snapshot.docChanges().forEach((change) => {
       const busId = change.doc.id;
+      const data = change.doc.data();
+      const shouldShowMarker =
+        change.type !== "removed" && data.active && typeof data.lat === "number" && typeof data.lng === "number";
 
-      if (change.type === "removed") {
+      if (!shouldShowMarker) {
         if (busMarkers.has(busId)) {
           map.removeLayer(busMarkers.get(busId));
           busMarkers.delete(busId);
         }
         return;
       }
-
-      const data = change.doc.data();
-      if (typeof data.lat !== "number" || typeof data.lng !== "number") return;
 
       if (busMarkers.has(busId)) {
         busMarkers.get(busId).setLatLng([data.lat, data.lng]);
