@@ -51,7 +51,8 @@
             <span class="card-chevron">▾</span>
           </div>
           <div class="card-detail">
-            <p>See which buses arrived late today.</p>
+            <p>See which buses have reported running late today.</p>
+            <div id="late-list" class="delay-list"></div>
           </div>
         </div>
         <div class="admin-card">
@@ -62,6 +63,26 @@
           </div>
           <div class="card-detail">
             <p>Assign roles to drivers, teachers, and students.</p>
+            <div id="users-list" class="delay-list"></div>
+            <p id="users-error" class="form-error"></p>
+          </div>
+        </div>
+        <div class="admin-card">
+          <div class="card-header">
+            <div class="admin-card-icon">🏫</div>
+            <h2>School Settings</h2>
+            <span class="card-chevron">▾</span>
+          </div>
+          <div class="card-detail">
+            <p>Set the school's location and daily hours, used for arrival estimates and the student schedule.</p>
+            <div class="card-form">
+              <input type="number" id="school-lat" placeholder="Latitude" step="any">
+              <input type="number" id="school-lng" placeholder="Longitude" step="any">
+              <input type="text" id="school-start" placeholder="Start time (e.g. 07:45)">
+              <input type="text" id="school-end" placeholder="End time (e.g. 14:45)">
+              <button id="school-save">Save School Settings</button>
+              <p id="school-error" class="form-error"></p>
+            </div>
           </div>
         </div>
       </div>

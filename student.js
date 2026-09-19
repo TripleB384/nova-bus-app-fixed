@@ -6,14 +6,71 @@ const welcomeMsg = document.getElementById("welcome-msg");
 const logoutBtn = document.getElementById("logout-btn");
 const delayBanner = document.getElementById("delay-banner");
 const mapCardHeader = document.querySelector("#map-card .card-header");
+const etaList = document.getElementById("eta-list");
+const scheduleText = document.getElementById("schedule-text");
 
 const BROWARD_CENTER = [26.1901, -80.3659];
 const BROWARD_ZOOM = 11;
 const BROWARD_MIN_ZOOM = 9;
+const AVERAGE_SPEED_MPH = 20;
 
 const busMarkers = new Map();
 let unsubscribeBuses = null;
 let map = null;
+let school = null;
+
+function haversineMiles(lat1, lng1, lat2, lng2) {
+  const R = 3958.8;
+  const toRad = (deg) => (deg * Math.PI) / 180;
+  const dLat = toRad(lat2 - lat1);
+  const dLng = toRad(lng2 - lng1);
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLng / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+async function loadSchoolSettings() {
+  try {
+    const snap = await getDoc(doc(db, "settings", "school"));
+    if (snap.exists()) school = snap.data();
+  } catch (err) {
+    // Arrival Time / Schedule cards fall back to their "not set" messages.
+  }
+}
+
+function renderEtaList(busDocs) {
+  if (!school || typeof school.lat !== "number" || typeof school.lng !== "number") {
+    etaList.innerHTML = "<p>School location hasn't been set yet — ask your admin.</p>";
+    return;
+  }
+
+  const active = busDocs.filter((d) => typeof d.data().lat === "number" && typeof d.data().lng === "number");
+
+  if (active.length === 0) {
+    etaList.innerHTML = "<p>No buses are currently sharing their location.</p>";
+    return;
+  }
+
+  etaList.innerHTML = "";
+  active.forEach((d) => {
+    const data = d.data();
+    const miles = haversineMiles(data.lat, data.lng, school.lat, school.lng);
+    const minutes = Math.round((miles / AVERAGE_SPEED_MPH) * 60);
+
+    const item = document.createElement("p");
+    item.textContent = `${data.driverEmail || "Bus"} — ${miles.toFixed(1)} mi from school — ~${minutes} min (estimated)`;
+    etaList.appendChild(item);
+  });
+}
+
+function renderSchedule() {
+  if (!school || (!school.startTime && !school.endTime)) {
+    scheduleText.textContent = "School hours haven't been set yet.";
+    return;
+  }
+  scheduleText.textContent = `School starts at ${school.startTime || "?"} and ends at ${school.endTime || "?"}.`;
+}
 
 function renderDelayBanner(busDocs) {
   const delayed = busDocs.filter((d) => d.data().delayed);
@@ -52,6 +109,7 @@ function startLiveMap() {
 
   unsubscribeBuses = onSnapshot(busesQuery, (snapshot) => {
     renderDelayBanner(snapshot.docs);
+    renderEtaList(snapshot.docs);
 
     snapshot.docChanges().forEach((change) => {
       const busId = change.doc.id;
@@ -102,6 +160,8 @@ onAuthStateChanged(auth, async (user) => {
     }
 
     welcomeMsg.textContent = "Signed in as " + user.email;
+    await loadSchoolSettings();
+    renderSchedule();
     startLiveMap();
   } catch (err) {
     welcomeMsg.textContent = "Error loading profile: " + err.message;

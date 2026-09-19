@@ -402,3 +402,22 @@ body.dash-page {
   font-size: 0.8rem;
   min-height: 1em;
 }
+
+.user-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+  font-size: 0.85rem;
+  color: var(--cream);
+}
+
+.user-row select {
+  padding: 0.4rem 0.6rem;
+  border-radius: 6px;
+  border: 1px solid rgba(143, 168, 150, 0.35);
+  background: var(--green-deep);
+  color: var(--cream);
+  font-size: 0.8rem;
+}
