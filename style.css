@@ -149,6 +149,16 @@ button:active {
   margin-top: 1.5rem;
 }
 
+.footer-note + .footer-note {
+  margin-top: 0.5rem;
+}
+
+.footer-note a {
+  color: var(--gold-bright);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
 /* Dashboard layout (admin, driver, teacher, student pages) */
 
 body.dash-page {

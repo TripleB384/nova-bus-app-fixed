@@ -135,6 +135,16 @@ function startUsersList() {
       name.textContent = label;
 
       const select = document.createElement("select");
+
+      if (!data.role) {
+        const placeholder = document.createElement("option");
+        placeholder.value = "";
+        placeholder.textContent = "— pending —";
+        placeholder.disabled = true;
+        placeholder.selected = true;
+        select.appendChild(placeholder);
+      }
+
       ["admin", "driver", "teacher", "student"].forEach((role) => {
         const option = document.createElement("option");
         option.value = role;
